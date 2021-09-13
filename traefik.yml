@@ -10,3 +10,7 @@ entrypoints:
     address: :80
   web-secure:
     address: :443
+  streaming:
+    address: :53
+providers:
+  docker: true

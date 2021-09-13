@@ -7,16 +7,34 @@ services:
     hostname: "traefik"
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./traefik.yml:/traefik.yml:ro"
 
-  whoami:
-    image: "traefik/whoami"
-    container_name: "simple-service"
+  registry:
+    restart: always
+    image: registry:2
+    container_name: "simple-registry"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
-      - "traefik.http.routers.whoami.entrypoints=web"
-  
+      - "traefik.port=5000"
+      - "traefik.http.routers.registry.rule=Host(`docker.localhost`)"
+      - "traefik.http.routers.registry.entrypoints=web"
+
+
+  dnsmasq:
+    restart: always
+    image: jpillora/dnsmasq
+    container_name: "dnsmasq"
+    volumes:
+      - ./dnsmasq.conf:/etc/dnsmasq.conf"
+    environment:
+      - HTTP_USER=admin 
+      - HTTP_PASS=admin 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8080"
+      - "traefik.http.routers.dnsmasq.rule=Host(`dnsmasq.local`)"
+      - "traefik.http.routers.dnsmasq.entrypoints=web"
