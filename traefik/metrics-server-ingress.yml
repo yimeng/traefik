@@ -1,0 +1,27 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-server
+  namespace: kube-system
+
+spec:
+  entryPoints:
+    - web
+
+  routes:
+  - match: PathPrefix(`/metrics-server`)
+    kind: Rule
+    services:
+    - name: metrics-server
+      port: 443
+    middlewares:
+      - name: stripprefix
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: stripprefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /metrics-server

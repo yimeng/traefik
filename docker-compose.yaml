@@ -9,6 +9,7 @@ services:
       - "80:80"
       - "443:443"
       - "8080:8080"
+      - "53:53/udp"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./traefik.yml:/traefik.yml:ro"
@@ -27,14 +28,17 @@ services:
   dnsmasq:
     restart: always
     image: jpillora/dnsmasq
-    container_name: "dnsmasq"
-    volumes:
-      - ./dnsmasq.conf:/etc/dnsmasq.conf"
-    environment:
-      - HTTP_USER=admin 
-      - HTTP_PASS=admin 
+    container_name: "simple-dnsmasq"
+    ports:
+      - "8000:8080"
+      - "5333:53/udp"
     labels:
       - "traefik.enable=true"
-      - "traefik.port=8080"
-      - "traefik.http.routers.dnsmasq.rule=Host(`dnsmasq.local`)"
-      - "traefik.http.routers.dnsmasq.entrypoints=web"
+      - "traefik.port=8000"
+      - "traefik.http.routers.dnsmasq-web.entrypoints=web"
+      - "traefik.http.routers.dnsmasq-web.rule=Host(`dnsmasq.local`)"
+      - "traefik.http.services.dnsmasq-web.loadbalancer.server.port=8080"
+
+      - "traefik.port=5333/udp"
+      - "traefik.udp.routers.dnsmasq-udp.entrypoints=streaming"
+      - "traefik.udp.services.dnsmasq-udp.loadbalancer.server.port=53"

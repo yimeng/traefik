@@ -11,6 +11,6 @@ entrypoints:
   web-secure:
     address: :443
   streaming:
-    address: :53
+    address: :53/udp
 providers:
   docker: true

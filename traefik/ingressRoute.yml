@@ -1,0 +1,58 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: myingressroute
+  namespace: default
+
+spec:
+  entryPoints:
+    - web
+
+  routes:
+  - match: PathPrefix(`/whoami`)
+    kind: Rule
+    services:
+    - name: whoami
+      port: 80
+    middlewares:
+      - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: ingressroute.tcp
+  namespace: default
+
+spec:
+  entryPoints:
+    - tcpep
+  routes:
+  - match: HostSNI(`bar`)
+    services:
+      - name: whoamitcp
+        port: 8080
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteUDP
+metadata:
+  name: ingressroute.udp
+  namespace: default
+
+spec:
+  entryPoints:
+    - udpep
+  routes:
+  - services:
+      - name: whoamiudp
+        port: 8080
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: stripprefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /whoami
